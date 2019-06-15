@@ -2,6 +2,7 @@
     "description": "Integrate the CKEditor Inspector into the Neos UI (only in Dev context)",
     "type": "neos-package",
     "name": "sandstorm/ckeditorinspector",
+    "license": "GPL-2.0-or-later",
     "require": {
         "neos/flow": "*",
         "neos/neos-ui": "~2.6 || ~3.6 || dev-master"

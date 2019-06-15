@@ -1,0 +1,9 @@
+
+Neos:
+  Neos:
+    Ui:
+      resources:
+        javascript:
+          # we only load the CKEditor Inspector in Dev mode!
+          'Sandstorm.CkEditorInspector:Inspector':
+            resource: resource://Sandstorm.CkEditorInspector/Public/Inspector/Plugin.js
