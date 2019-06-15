@@ -1,0 +1,19 @@
+{
+    "description": "Integrate the CKEditor Inspector into the Neos UI (only in Dev context)",
+    "type": "neos-package",
+    "name": "sandstorm/ckeditorinspector",
+    "require": {
+        "neos/flow": "*",
+        "neos/neos-ui": "~2.6 || ~3.6 || dev-master"
+    },
+    "autoload": {
+        "psr-4": {
+            "Sandstorm\\CkEditorInspector\\": "Classes/"
+        }
+    },
+    "extra": {
+        "neos": {
+            "package-key": "Sandstorm.CkEditorInspector"
+        }
+    }
+}
