@@ -3,7 +3,11 @@ Neos:
   Neos:
     Ui:
       resources:
+
+        # we only load the CKEditor Inspector in Dev mode!
         javascript:
-          # we only load the CKEditor Inspector in Dev mode!
           'Sandstorm.CkEditorInspector:Inspector':
             resource: resource://Sandstorm.CkEditorInspector/Public/Inspector/Plugin.js
+        stylesheets:
+          'Sandstorm.CkEditorInspector:Inspector':
+            resource: resource://Sandstorm.CkEditorInspector/Public/Inspector/Plugin.css

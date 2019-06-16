@@ -5600,6 +5600,26 @@ module.exports = (0, _readFromConsumerApi2.default)('vendor')().plow;
 
 /***/ }),
 
+/***/ "./node_modules/@neos-project/neos-ui-extensibility/src/shims/vendor/react/index.js":
+/*!******************************************************************************************!*\
+  !*** ./node_modules/@neos-project/neos-ui-extensibility/src/shims/vendor/react/index.js ***!
+  \******************************************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var _readFromConsumerApi = __webpack_require__(/*! ../../../../dist/readFromConsumerApi */ "./node_modules/@neos-project/neos-ui-extensibility/dist/readFromConsumerApi.js");
+
+var _readFromConsumerApi2 = _interopRequireDefault(_readFromConsumerApi);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+module.exports = (0, _readFromConsumerApi2.default)('vendor')().React;
+
+/***/ }),
+
 /***/ "./node_modules/@neos-project/positional-array-sorter/dist/positionalArraySorter.js":
 /*!******************************************************************************************!*\
   !*** ./node_modules/@neos-project/positional-array-sorter/dist/positionalArraySorter.js ***!
@@ -5611,12 +5631,6 @@ module.exports = (0, _readFromConsumerApi2.default)('vendor')().plow;
 
 
 exports.__esModule = true;
-var isOriginal = function isOriginal(value) {
-    return value && value.indexOf && value.indexOf('_original_') === 0;
-};
-var getOriginal = function getOriginal(value) {
-    return value && value.substring && Number(value.substring(10));
-};
 var positionalArraySorter = function positionalArraySorter(subject, position, idKey) {
     if (position === void 0) {
         position = 'position';
@@ -5627,130 +5641,148 @@ var positionalArraySorter = function positionalArraySorter(subject, position, id
     var positionAccessor = typeof position === 'string' ? function (value) {
         return value[position];
     } : position;
-    var positionsArray = subject.map(function (value, index) {
-        var position = positionAccessor(value);
-        return position === undefined ? "_original_" + index : position;
-    });
-    var validKeys = subject.map(function (value) {
-        return idKey in value && value[idKey];
-    }).filter(function (i) {
-        return i;
-    }).map(function (i) {
-        return String(i);
-    });
-    var middleKeys = [];
-    var startKeys = [];
-    var endKeys = [];
-    var beforeKeys = [];
-    var afterKeys = [];
-    var corruptKeys = [];
-    positionsArray.forEach(function (value, index) {
-        if (isNaN(value) === false || isOriginal(value)) {
-            middleKeys.push([index, value]);
-        } else if (typeof value === 'string') {
-            if (value.includes('start')) {
-                var weightMatch = value.match(/start\s+(\d+)/);
-                var weight = weightMatch && weightMatch[1] || 0;
-                startKeys.push([index, Number(weight)]);
-            } else if (value.includes('end')) {
-                var weightMatch = value.match(/end\s+(\d+)/);
-                var weight = weightMatch && weightMatch[1] || 0;
-                endKeys.push([index, Number(weight)]);
-            } else if (value.includes('before')) {
-                var keyMatch = value.match(/before\s+(\S+)/);
-                var key = keyMatch && keyMatch[1];
-                if (key && validKeys.includes(key)) {
-                    beforeKeys.push([index, key]);
-                } else {
-                    corruptKeys.push(index);
-                    console.warn('The following position value is corrupt: %s', value);
-                }
-            } else if (value.includes('after')) {
-                var keyMatch = value.match(/after\s+(\S+)/);
-                var key = keyMatch && keyMatch[1];
-                if (key && validKeys.includes(key)) {
-                    afterKeys.push([index, key]);
-                } else {
-                    corruptKeys.push(index);
-                    console.warn('The following position value is corrupt: %s', value);
-                }
+    var indexMapping = {};
+    var middleKeys = {};
+    var startKeys = {};
+    var endKeys = {};
+    var beforeKeys = {};
+    var afterKeys = {};
+    subject.forEach(function (item, index) {
+        var key = item[idKey] ? item[idKey] : String(index);
+        indexMapping[key] = index;
+        var positionValue = positionAccessor(item);
+        var position = String(positionValue ? positionValue : index);
+        var invalid = false;
+        if (position.startsWith('start')) {
+            var weightMatch = position.match(/start\s+(\d+)/);
+            var weight = weightMatch && weightMatch[1] ? Number(weightMatch[1]) : 0;
+            if (!startKeys[weight]) {
+                startKeys[weight] = [];
+            }
+            startKeys[weight].push(key);
+        } else if (position.startsWith('end')) {
+            var weightMatch = position.match(/end\s+(\d+)/);
+            var weight = weightMatch && weightMatch[1] ? Number(weightMatch[1]) : 0;
+            if (!endKeys[weight]) {
+                endKeys[weight] = [];
+            }
+            endKeys[weight].push(key);
+        } else if (position.startsWith('before')) {
+            var match = position.match(/before\s+(\S+)(\s+(\d+))?/);
+            if (!match) {
+                invalid = true;
             } else {
-                corruptKeys.push(index);
-                console.warn('The following position value is corrupt: %s', value);
+                var reference = match[1];
+                var weight = match[3] ? Number(match[3]) : 0;
+                if (!beforeKeys[reference]) {
+                    beforeKeys[reference] = {};
+                }
+                if (!beforeKeys[reference][weight]) {
+                    beforeKeys[reference][weight] = [];
+                }
+                beforeKeys[reference][weight].push(key);
+            }
+        } else if (position.startsWith('after')) {
+            var match = position.match(/after\s+(\S+)(\s+(\d+))?/);
+            if (!match) {
+                invalid = true;
+            } else {
+                var reference = match[1];
+                var weight = match[3] ? Number(match[3]) : 0;
+                if (!afterKeys[reference]) {
+                    afterKeys[reference] = {};
+                }
+                if (!afterKeys[reference][weight]) {
+                    afterKeys[reference][weight] = [];
+                }
+                afterKeys[reference][weight].push(key);
             }
         } else {
-            corruptKeys.push(index);
-            console.warn('The following position value is corrupt: %s', value);
+            invalid = true;
+        }
+        if (invalid) {
+            var numberPosition = parseFloat(position);
+            if (isNaN(numberPosition) || !isFinite(numberPosition)) {
+                numberPosition = index;
+            }
+            if (!middleKeys[numberPosition]) {
+                middleKeys[numberPosition] = [];
+            }
+            middleKeys[numberPosition].push(key);
         }
     });
-    var sortByWeightFunc = function sortByWeightFunc(a, b) {
-        return a[1] - b[1];
+    var resultStart = [];
+    var resultMiddle = [];
+    var resultEnd = [];
+    var processedKeys = [];
+    var sortedWeights = function sortedWeights(dict, asc) {
+        var weights = Object.keys(dict).map(function (x) {
+            return Number(x);
+        }).sort(function (a, b) {
+            return a - b;
+        });
+        return asc ? weights : weights.reverse();
     };
-    var sortWithRetainingOriginalPos = function sortWithRetainingOriginalPos(_a, _b) {
-        var a = _a[1];
-        var b = _b[1];
-        if (isOriginal(a) && isOriginal(b)) {
-            return getOriginal(a) - getOriginal(b);
-        }
-        if (typeof a === 'string' && a.includes && a.includes('_original_')) {
-            return 1;
-        }
-        if (typeof b === 'string' && b.includes && b.includes('_original_')) {
-            return -1;
-        }
-        return Number(a) - Number(b);
-    };
-    var sortedIndexes = startKeys.sort(sortByWeightFunc).map(function (pair) {
-        return pair[0];
-    }).concat(middleKeys.sort(sortWithRetainingOriginalPos).map(function (pair) {
-        return pair[0];
-    }), corruptKeys, endKeys.sort(sortByWeightFunc).map(function (pair) {
-        return pair[0];
-    }));
-    var _loop_1 = function _loop_1() {
-        var alteredNumber = 0;
-        beforeKeys.forEach(function (pair, index) {
-            var targetIndexInSubject = subject.findIndex(function (item) {
-                return String(item[idKey]) === pair[1];
-            });
-            var indexInIndexes = sortedIndexes.findIndex(function (item) {
-                return item === targetIndexInSubject;
-            });
-            if (indexInIndexes !== -1) {
-                sortedIndexes.splice(indexInIndexes, 0, pair[0]);
-                beforeKeys.splice(index, 1);
-                alteredNumber++;
+    var addToResults = function addToResults(keys, result) {
+        keys.forEach(function (key) {
+            if (processedKeys.indexOf(key) >= 0) {
+                return;
+            }
+            processedKeys.push(key);
+            if (beforeKeys[key]) {
+                var beforeWeights = sortedWeights(beforeKeys[key], true);
+                for (var _i = 0, beforeWeights_1 = beforeWeights; _i < beforeWeights_1.length; _i++) {
+                    var i = beforeWeights_1[_i];
+                    addToResults(beforeKeys[key][i], result);
+                }
+            }
+            result.push(key);
+            if (afterKeys[key]) {
+                var afterWeights = sortedWeights(afterKeys[key], false);
+                for (var _a = 0, afterWeights_1 = afterWeights; _a < afterWeights_1.length; _a++) {
+                    var i = afterWeights_1[_a];
+                    addToResults(afterKeys[key][i], result);
+                }
             }
         });
-        afterKeys.forEach(function (pair, index) {
-            var targetIndexInSubject = subject.findIndex(function (item) {
-                return String(item[idKey]) === pair[1];
-            });
-            var indexInIndexes = sortedIndexes.findIndex(function (item) {
-                return item === targetIndexInSubject;
-            });
-            if (indexInIndexes !== -1) {
-                sortedIndexes.splice(indexInIndexes + 1, 0, pair[0]);
-                afterKeys.splice(index, 1);
-                alteredNumber++;
-            }
-        });
-        if (alteredNumber === 0) {
-            console.warn('Circular reference detected. Append broken entries at the end.');
-            sortedIndexes = sortedIndexes.concat(beforeKeys.map(function (pair) {
-                return pair[0];
-            }), afterKeys.map(function (pair) {
-                return pair[0];
-            }));
-            return "break";
-        }
     };
-    while (beforeKeys.length > 0 || afterKeys.length > 0) {
-        var state_1 = _loop_1();
-        if (state_1 === "break") break;
+    for (var _i = 0, _a = sortedWeights(startKeys, false); _i < _a.length; _i++) {
+        var i = _a[_i];
+        addToResults(startKeys[i], resultStart);
     }
-    return sortedIndexes.map(function (index) {
-        return subject[index];
+    for (var _b = 0, _c = sortedWeights(middleKeys, true); _b < _c.length; _b++) {
+        var i = _c[_b];
+        addToResults(middleKeys[i], resultMiddle);
+    }
+    for (var _d = 0, _e = sortedWeights(endKeys, true); _d < _e.length; _d++) {
+        var i = _e[_d];
+        addToResults(endKeys[i], resultEnd);
+    }
+    for (var _f = 0, _g = Object.keys(beforeKeys); _f < _g.length; _f++) {
+        var key = _g[_f];
+        if (processedKeys.indexOf(key) >= 0) {
+            continue;
+        }
+        for (var _h = 0, _j = sortedWeights(beforeKeys[key], false); _h < _j.length; _h++) {
+            var i = _j[_h];
+            addToResults(beforeKeys[key][i], resultStart);
+        }
+    }
+    for (var _k = 0, _l = Object.keys(afterKeys); _k < _l.length; _k++) {
+        var key = _l[_k];
+        if (processedKeys.indexOf(key) >= 0) {
+            continue;
+        }
+        for (var _m = 0, _o = sortedWeights(afterKeys[key], false); _m < _o.length; _m++) {
+            var i = _o[_m];
+            addToResults(afterKeys[key][i], resultMiddle);
+        }
+    }
+    var sortedKeys = resultStart.concat(resultMiddle, resultEnd);
+    return sortedKeys.map(function (key) {
+        return indexMapping[key];
+    }).map(function (i) {
+        return subject[i];
     });
 };
 exports["default"] = positionalArraySorter;
@@ -6117,6 +6149,12 @@ exports.default = Inspector;
 "use strict";
 
 
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _react = __webpack_require__(/*! react */ "./node_modules/@neos-project/neos-ui-extensibility/src/shims/vendor/react/index.js");
+
+var _react2 = _interopRequireDefault(_react);
+
 var _neosUiExtensibility = __webpack_require__(/*! @neos-project/neos-ui-extensibility */ "./node_modules/@neos-project/neos-ui-extensibility/dist/index.js");
 
 var _neosUiExtensibility2 = _interopRequireDefault(_neosUiExtensibility);
@@ -6127,7 +6165,15 @@ var _inspector = __webpack_require__(/*! ./inspector */ "./src/inspector.js");
 
 var _inspector2 = _interopRequireDefault(_inspector);
 
+__webpack_require__(/*! ./style.vanilla-css */ "./src/style.vanilla-css");
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
 (0, _neosUiExtensibility2.default)('Sandstorm.CkEditorInspector:Inspector', {}, function (globalRegistry) {
     var config = globalRegistry.get('ckEditor5').get('config');
@@ -6136,7 +6182,55 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
     config.set('sandstorm_ckeditorInspector', function (ckEditorConfiguration) {
         return (0, _plowJs.$add)('plugins', _inspector2.default, ckEditorConfiguration);
     });
+
+    // We wrap the left and right sidebar with an extra div where we know the class name;
+    // so that we can manipulate the sidebar's CSS to set some paddings; and same for content canvas.
+    var containerRegistry = globalRegistry.get('containers');
+    containerRegistry.set('LeftSideBar', wrapComponent(containerRegistry.get('LeftSideBar'), 'sandstorm_ckeditorinspector_leftSideBarWrapper'));
+    containerRegistry.set('RightSideBar', wrapComponent(containerRegistry.get('RightSideBar'), 'sandstorm_ckeditorinspector_rightSideBarWrapper'));
+    containerRegistry.set('ContentCanvas', wrapComponent(containerRegistry.get('ContentCanvas'), 'sandstorm_ckeditorinspector_contentCanvasWrapper'));
 });
+
+/**
+ * wrapComponent wraps a <div class="..."> around the
+ * passed-in component; so that we can target the subcomponent via CSS;
+ * to adjust its styling.
+ */
+function wrapComponent(InnerComponent, className) {
+    return function (_PureComponent) {
+        _inherits(LeftAndRightSideBarWrapper, _PureComponent);
+
+        function LeftAndRightSideBarWrapper() {
+            _classCallCheck(this, LeftAndRightSideBarWrapper);
+
+            return _possibleConstructorReturn(this, (LeftAndRightSideBarWrapper.__proto__ || Object.getPrototypeOf(LeftAndRightSideBarWrapper)).apply(this, arguments));
+        }
+
+        _createClass(LeftAndRightSideBarWrapper, [{
+            key: 'render',
+            value: function render() {
+                return _react2.default.createElement(
+                    'div',
+                    { className: className },
+                    _react2.default.createElement(InnerComponent, this.props)
+                );
+            }
+        }]);
+
+        return LeftAndRightSideBarWrapper;
+    }(_react.PureComponent);
+}
+
+/***/ }),
+
+/***/ "./src/style.vanilla-css":
+/*!*******************************!*\
+  !*** ./src/style.vanilla-css ***!
+  \*******************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+// extracted by mini-css-extract-plugin
 
 /***/ })
 
