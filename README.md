@@ -2,6 +2,9 @@
 
 The CKEditorInspector is a Neos UI Plugin to include the [CKEditor 5 Inspector](https://ckeditor.com/docs/ckeditor5/latest/framework/guides/development-tools.html#ckeditor-5-inspector) inside Neos. This is very helpful when debugging CKEditor5 plugins.
 
+
+<img src="https://user-images.githubusercontent.com/190777/59579198-039f2400-90cc-11e9-9003-e8b8b0cca16f.png">
+
 ## Installation
 
 ```bash
