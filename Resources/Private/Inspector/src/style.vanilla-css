@@ -1,28 +1,11 @@
-/***** Left Side Bar *****/
-body.ck-inspector-body-expanded .sandstorm_ckeditorinspector_leftSideBarWrapper > * {
-    padding-bottom: var(--ck-inspector-height, 0px);
+
+
+body.ck-inspector-body-expanded [class^=_applicationWrapper] {
+    height: calc(100vh - var(--ck-inspector-height, 0px))!important;
 }
 
-/***** Right Side Bar *****/
-body.ck-inspector-body-expanded .sandstorm_ckeditorinspector_rightSideBarWrapper > * {
-    /* We need to add an additional 40px to the padding, to have the Apply/Discard visible. */
-    padding-bottom: calc(var(--ck-inspector-height, 0px) + 40px);
+
+body.ck-inspector-body-collapsed [class^=_applicationWrapper] {
+    height: calc(100vh - 30px)!important;
 }
 
-body.ck-inspector-body-expanded .sandstorm_ckeditorinspector_rightSideBarWrapper #neos-Inspector-Discard,
-body.ck-inspector-body-expanded .sandstorm_ckeditorinspector_rightSideBarWrapper #neos-Inspector-Apply {
-    /* Move Apply / Discard buttons in Inspector a little up */
-    position: relative;
-    bottom: var(--ck-inspector-height) !important;
-}
-
-/***** Content Canvas *****/
-.sandstorm_ckeditorinspector_contentCanvasWrapper {
-    position: absolute;
-    height: 100%;
-    width: 100%;
-}
-
-body.ck-inspector-body-expanded .sandstorm_ckeditorinspector_contentCanvasWrapper > * {
-    padding-bottom: var(--ck-inspector-height, 0px);
-}

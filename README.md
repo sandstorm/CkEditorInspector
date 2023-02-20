@@ -1,4 +1,4 @@
-# CKEditorInspector Neos Plugin
+# Sandstorm.CkEditorInspector Neos Plugin
 
 The CKEditorInspector is a Neos UI Plugin to include the [CKEditor 5 Inspector](https://ckeditor.com/docs/ckeditor5/latest/framework/guides/development-tools.html#ckeditor-5-inspector) inside Neos. This is very helpful when debugging CKEditor5 plugins.
 
@@ -25,7 +25,6 @@ To set up the development environment, run the following:
 
 ```
 cd Resources/Private/Inspector
-nvm use
 yarn
 npm run watch
 npm run build
